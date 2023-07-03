@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-
+import {
+    Link
+} from 'react-router-dom';
 const Login = ({ setToken }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -43,7 +45,7 @@ const Login = ({ setToken }) => {
             <p><input type="text" name="username" id="username" value={username} onChange={usernameHandler} placeholder="user name" /></p>
             <p><input type="password" name="password" id="password" value={password} onChange={passwordHandler} placeholder="password" /></p>
             <p><button onClick={login}>Login</button></p>
-
+            <p><Link to="/reg">Register</Link></p>
         </div>)
 }
 export default Login;

@@ -42,7 +42,6 @@ const updateUser = async (userId: string, password1: string, password2: string, 
         return { status: -1 };
     }
     return { status: -1 };;
-
 }
 const getDonations = async (email: string) => {
     const donations = await DonationData.find({ email: email })
@@ -61,6 +60,7 @@ const addDonation = async (email: string, amount: number) => {
             email: email,
             amount: amount,
             status: 0,
+            posted: new Date(),
             paid: null
         }
         console.log("donation:", donation)
@@ -75,7 +75,6 @@ const addDonation = async (email: string, amount: number) => {
     return 1;
 }
 const getUsers = async (id: string) => {
-
     console.log("from dao: " + id);
     const data = await UserData.find({});
     console.log("found", data);
@@ -83,10 +82,8 @@ const getUsers = async (id: string) => {
     for (let u of data) {
         console.log("U:", u);
         const user = { userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1, donations: u.donations }
-
         users.push(user);
     }
-
     console.log("USERS", users);
     return users;
 }
