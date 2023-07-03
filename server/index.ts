@@ -1,7 +1,7 @@
 import { ApolloServer, gql, AuthenticationError } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import guid from "guid";
-import { dbAuth, updateUser } from "./dao/dao";
+import { dbAuth, updateUser, getUserByEmail, getDonations } from "./dao/dao";
 // https://www.youtube.com/watch?v=QChEaOHauZY
 import users from "./users";
 import { charge } from "./services/stripe";
@@ -16,24 +16,50 @@ let stripe_url: string;
 const typeDefs = gql`
   type Query {
     todos: [String!]
+    profile: String!
+    donations: String!
   }
 
   type Mutation {
     authenticate(name: String!, password: String!): String
     refresh: String
     donate(amount: Float!): String
-    reg( password1: String!, password2: String!, lastName: String!, firstName: String!, email: String!):String
+    reg(password1: String!, password2: String!, lastName: String!, firstName: String!, email: String!):String
   }
 `;
-
+let userName: string
 const resolvers = {
   Query: {
     todos: (_parent: unknown, _args: unknown, context: { name: string }) => {
       console.log("CONTEXT", context?.name);
-      if (!users[context?.name]) {
+      const n = "jane";
+      if (!users[n]) {
         throw new AuthenticationError("Invalid credentials");
       }
-      return users[context?.name].todos;
+
+      return users[n].todos;
+    },
+    profile: async (_parent: unknown, _args: unknown, context: { name: string }) => {
+      console.log("profile", context?.name);
+
+      const user = await getUserByEmail(context?.name);
+
+      console.log("USER", user);
+      if (!user) {
+        throw new AuthenticationError("Invalid credentials");
+      }
+      const user2 = { username: user.username }
+      return JSON.stringify(user);
+    },
+    donations: async (_parent: unknown, _args: unknown, context: { name: string }) => {
+      console.log("profile", context?.name);
+
+      const donations = await getDonations(context?.name);
+
+      console.log("donations", donations);
+
+
+      return JSON.stringify(donations);
     },
   },
   Mutation: {
@@ -45,7 +71,7 @@ const resolvers = {
       const user = await dbAuth(name, password);
 
       if (user && user.status === 1) {
-        return jwt.sign({ data: name }, JWT_SECRET, { expiresIn: "5s" });
+        return jwt.sign({ data: name }, JWT_SECRET, { expiresIn: "7 days" });
       } else {
         return '{ data: { authenticate: "Failed login" } }';
       }
@@ -59,14 +85,14 @@ const resolvers = {
       const user = await updateUser("", password1, password2, lastName, firstName, email, 1, 1);
 
       if (user && user?.status === 1) {
-        return jwt.sign({ data: email }, JWT_SECRET, { expiresIn: "5s" });
+        return jwt.sign({ data: email }, JWT_SECRET, { expiresIn: "7 days" });
       } else {
         return '{ data: { authenticate: "Failed login" } }';
       }
     },
-    donate: async (_parent: unknown, { amount }: { amount: number }, _args: unknown, context: { name: string, res: any }) => {
-      console.log("donate.amount", amount, _args);
-      const resp = await charge(context?.name, amount);
+    donate: async (_parent: unknown, { amount }: { amount: number }, _args: unknown, context: { name: string }) => {
+      console.log("donate.amount", amount, userName);
+      const resp = await charge(userName, amount);
       console.log(resp);
       if (resp.status === 200) {
         console.log("redirect:", resp.url);
@@ -102,6 +128,7 @@ let GV_RESPONSE: any;
 async function startServer() {
   const server = new ApolloServer({
     formatResponse: (response, requestContext) => {
+      console.log("formatResponse")
       if (response.errors && !requestContext.request.variables?.password) {
         if (requestContext.response?.http) {
           requestContext.response.http.status = 401;
@@ -144,7 +171,7 @@ async function startServer() {
         res: null
       };
       console.log("context");
-      GV_RESPONSE = res;
+      // GV_RESPONSE = res;
       const cookies = (req.headers?.cookie ?? "")
         .split(";")
         .reduce<Record<string, string>>((obj, c) => {
@@ -157,19 +184,25 @@ async function startServer() {
         }, {});
 
       ctx.refreshToken = cookies?.refreshToken;
-
+      console.log("ctx.refreshToken", ctx.refreshToken);
       try {
         if (req.headers["x-access-token"]) {
+          console.log("req.headers", req.headers["x-access-token"])
           const token = jwt.verify(
             req.headers["x-access-token"] as string,
             JWT_SECRET
           ) as unknown as {
             data: string;
           };
+          console.log("TOKEN", token);
           ctx.name = token.data;
           ctx.res = res;
+          userName = ctx.name;
         }
-      } catch (e) { }
+      } catch (e) {
+        console.log("JWT ERROR ", e);
+      }
+      console.log("ctx.name:", ctx.name);
       return ctx;
     },
     typeDefs,

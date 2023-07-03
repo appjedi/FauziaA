@@ -14,6 +14,8 @@ var userDataSchema = new Schema({
 var UserData = mongoose.model('UserData', userDataSchema);
 const donationSchema = new Schema({
     id: String,
+    userId: String,
+    email: String,
     amount: Number,
     status: Number,
     paid: String,
@@ -42,13 +44,21 @@ const updateUser = async (userId: string, password1: string, password2: string, 
     return { status: -1 };;
 
 }
-const addDonation = async (userId: string, amount: number) => {
+const getDonations = async (email: string) => {
+    const donations = await DonationData.find({ email: email })
+    console.log("getDonations", donations);
+    return donations;
+}
+const addDonation = async (email: string, amount: number) => {
     try {
-        const user = await getUserById(userId);
+        const user = await getUserByEmail(email);
+        console.log("addDonation.user:", email, user);
+        const userId = (user ? user.userId : "");
         const id = new Date().getTime();
         const donation = {
             id: id,
             userId: userId,
+            email: email,
             amount: amount,
             status: 0,
             paid: null
@@ -72,7 +82,7 @@ const getUsers = async (id: string) => {
     const users = [];
     for (let u of data) {
         console.log("U:", u);
-        const user = { userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }
+        const user = { userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1, donations: u.donations }
 
         users.push(user);
     }
@@ -95,10 +105,11 @@ const getUserByEmail = async (email: string) => {
     const data = await UserData.find({ email: email });
     if (data) {
         const u = data[0];
-        const user = [{ userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }]
+        const id = u._id.toString()
+        const user = { userId: id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }
         return user;
     } else {
-        const user = [{ userId: "NF", username: email, lastName: "", firstName: "", email: "", password: "", roleId: 0, status: 0 }]
+        const user = { userId: "NF", username: email, lastName: "", firstName: "", email: "", password: "", roleId: 0, status: 0 }
     }
 }
 const dbAuth = async (username: string, password: string) => {
@@ -114,4 +125,4 @@ const dbAuth = async (username: string, password: string) => {
     return user;
 
 }
-export { updateUser, getUsers, dbAuth, addDonation, getUserByEmail };
+export { updateUser, getUsers, dbAuth, addDonation, getUserByEmail, getDonations };
