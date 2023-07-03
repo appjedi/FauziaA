@@ -1,7 +1,7 @@
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
+const { addDonation } = require("./dao/dao");
 
-
-const charge = async (amount) => {
+const charge = async (res, amount) => {
     try {
         console.log("checkout");
         const description = "Donation"
@@ -13,15 +13,17 @@ const charge = async (amount) => {
             },
             "quantity": parseInt(1)
         }];
+        const userId = "";
         const id = dt.getTime();
-        const items = [{ charge_id: id, itemId: 1, quantity: 1 }]
+        const items = [{ userId: userId, charge_id: id, itemId: 1, quantity: 1 }]
+        const donationId = await addDonation(userId, amount);
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
             line_items: lineItems,
             client_reference_id: items[0].charge_id,
-            success_url: `${process.env.CLIENT_URL}/success/${items[0].charge_id}/2023`,
-            cancel_url: `${process.env.CLIENT_URL}/cancel/${items[0].charge_id}/2023`,
+            success_url: `${process.env.CLIENT_URL}/success/${id}/2023`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel/${id}/2023`,
         })
         res.redirect(session.url);
     } catch (e) {

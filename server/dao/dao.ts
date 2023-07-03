@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 mongoose.connect('mongodb://localhost:27017/FauziaA');
 var Schema = mongoose.Schema;
 
@@ -18,10 +18,10 @@ const donationSchema = new Schema({
     status: Number,
     paid: String,
     posted: String
-})
+}, { collection: 'donations' });
 const DonationData = mongoose.model('DonationData', donationSchema);
 
-const updateUser = async (userId, password1, password2, lastName, firstName, email, roleId, status) => {
+const updateUser = async (userId: string, password1: string, password2: string, lastName: string, firstName: string, email: string, roleId: number, status: number) => {
     try {
         const user = {
             email: email,
@@ -33,25 +33,28 @@ const updateUser = async (userId, password1, password2, lastName, firstName, ema
         }
         console.log("Update User:", user)
         const resp = await UserData.create(user);
+        console.log(resp);
+        return user;
     } catch (e) {
         console.log(e);
-        return -1;
+        return { status: -1 };
     }
-    return 1;
+    return { status: -1 };;
 
 }
-const addDonation = async (userId, amount) => {
+const addDonation = async (userId: string, amount: number) => {
     try {
+        const user = await getUserById(userId);
+        const id = new Date().getTime();
         const donation = {
+            id: id,
             userId: userId,
             amount: amount,
             status: 0,
             paid: null
         }
         console.log("donation:", donation)
-        const user = await getUserById(userId);
-        const id = new Date().getTime();
-        user.donations.push({ id: id, amount: amount, status: 0, paid: "" });
+        // user.donations.push({ id: id, amount: amount, status: 0, paid: "" });
         const resp = await DonationData.create(donation);
         console.log("addDonation.RESP:", resp);
         return id;
@@ -61,7 +64,7 @@ const addDonation = async (userId, amount) => {
     }
     return 1;
 }
-const getUsers = async (id) => {
+const getUsers = async (id: string) => {
 
     console.log("from dao: " + id);
     const data = await UserData.find({});
@@ -69,7 +72,7 @@ const getUsers = async (id) => {
     const users = [];
     for (let u of data) {
         console.log("U:", u);
-        const user = { userId: u._id, username: u.email, lastName: u.fullname, firstName: u.fullname, email: u.email, password: "******", roleId: 1, status: 1 }
+        const user = { userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }
 
         users.push(user);
     }
@@ -77,28 +80,28 @@ const getUsers = async (id) => {
     console.log("USERS", users);
     return users;
 }
-const getUserById = async (id) => {
+const getUserById = async (id: string) => {
     console.log("ID: ", id)
     const user = await UserData.findById(id);
-    console.log("DATA:", u);
+    console.log("DATA:", user);
     if (user) {
         return user;
     } else {
         null;
     }
 }
-const getUserByEmail = async (email) => {
+const getUserByEmail = async (email: string) => {
 
     const data = await UserData.find({ email: email });
     if (data) {
         const u = data[0];
-        const user = [{ userId: u._id, username: u.email, lastName: u.fullname, firstName: u.fullname, email: u.email, password: "******", roleId: 1, status: 1 }]
+        const user = [{ userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }]
         return user;
     } else {
         const user = [{ userId: "NF", username: email, lastName: "", firstName: "", email: "", password: "", roleId: 0, status: 0 }]
     }
 }
-const dbAuth = async (username, password) => {
+const dbAuth = async (username: string, password: string) => {
     const data = await UserData.find({ email: username });
     if (!data) {
         return { status: -1, message: "Not Found" }
@@ -111,4 +114,4 @@ const dbAuth = async (username, password) => {
     return user;
 
 }
-module.exports = { updateUser, getUsers, dbAuth, addDonation, getUserByEmail }
+export { updateUser, getUsers, dbAuth, addDonation, getUserByEmail };

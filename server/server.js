@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 //const { graphqlHTTP } = require('express-graphql');
 const expressGraphQL = require('express-graphql').graphqlHTTP
 const { getUsers, updateUser, getUserByEmail } = require("./dao/dao");
-const { login } = require("./auth");
+const { login, getRefreshTokens, auth, getUserByToken } = require("./auth");
 const {
     GraphQLSchema,
     GraphQLObjectType,
@@ -69,7 +69,7 @@ const RootQueryType = new GraphQLObjectType({
                 username: { type: GraphQLString },
                 password: { type: GraphQLString }
             },
-            resolve: (async (parent, args) => login(args.username, args.password))
+            resolve: (async (parent, args, context) => login(args.username, args.password, context))
 
         }
 
@@ -128,7 +128,19 @@ const schema = new GraphQLSchema({
     query: RootQueryType,
     mutation: RootMutationType
 })
+app.get("/user", (req, res) => {
+    const token = req.query.token;
+    console.log("user.token:", token);
+    const user = getUserByToken(token);
+    // const authHeader = req.headers['authorization']
+    console.log("USER", user);
+    //  console.log("authHeader", authHeader);
 
+
+    const tokens = getRefreshTokens();
+    console.log("getRefreshTokens", tokens);
+    res.send(user);
+})
 app.use('/graphql', expressGraphQL({
     schema: schema,
     graphiql: true
