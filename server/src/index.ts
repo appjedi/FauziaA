@@ -8,7 +8,7 @@ import users from "./users";
 import { charge } from "./services/stripe";
 import express from 'express';
 import cors from 'cors';
-
+const PORT = 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 const refreshTokens: Record<string, string> = {};
@@ -210,18 +210,18 @@ async function startServer() {
   });
   await server.start();
   server.applyMiddleware({ app });
-  const PORT = 3000;
 
   app.get("/success/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    updateFromStripe(id, "success");
+    updateFromStripe(id, 1);
     const resp = { status: "success", id: id, token: token }
     res.send(resp);
   });
   app.get("/failure/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
+    updateFromStripe(id, -1);
     const resp = { status: "failed", id: id, token: token }
     res.send(resp);
   });
@@ -230,8 +230,4 @@ async function startServer() {
   });
 }
 startServer();
-/*
-server.listen({ port: 3000 }).then(({ url }) => {
-  console.log(`🚀  server ready at ${url}`);
-});
-*/
+

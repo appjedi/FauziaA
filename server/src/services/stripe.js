@@ -1,10 +1,12 @@
 
-import { addDonation } from "../dao/dao1.mjs";
-import Stripe from 'stripe';
+const { addDonation } = require("../dao/dao1.mjs");
+//import Stripe from 'stripe';
+
 //const stripe (process.env.STRIPE_PRIVATE_KEY);
 const charge = async (email, amount) => {
     try {
-        const stripe =new Stripe(process.env.STRIPE_PRIVATE_KEY);
+        //const stripe =new Stripe(process.env.STRIPE_PRIVATE_KEY);
+        const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
         console.log("STRIPE_PRIVATE_KEY", process.env.STRIPE_PRIVATE_KEY);
         const description = "Donation"

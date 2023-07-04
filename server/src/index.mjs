@@ -1,21 +1,23 @@
 import { ApolloServer, gql, AuthenticationError } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import guid from "guid";
-require("dotenv").config();
-import { dbAuth, updateUser, getUserByEmail, getDonations, updateFromStripe } from "./dao/dao";
+//require("dotenv").config();
+import dotenv from 'dotenv'
+dotenv.config();
+console.log("process.env.MONGO_URL:", process.env.MONGO_URL);
+
 // https://www.youtube.com/watch?v=QChEaOHauZY
-import users from "./users";
-import { charge } from "./services/stripe";
+import { charge } from "./services/stripe.mjs";
 import express from 'express';
 import cors from 'cors';
-
+import { dbAuth, updateUser, getUserByEmail, getDonations, updateFromStripe } from "./dao/dao1.mjs";
+const PORT = 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 const refreshTokens = {};
 let stripe_url;
 const typeDefs = gql`
   type Query {
-    todos: [String!]
     profile: String!
     donations: String!
   }
@@ -28,17 +30,10 @@ const typeDefs = gql`
   }
 `;
 let userName
+
 const resolvers = {
   Query: {
-    todos: (_parent, _args, context) => {
-      console.log("CONTEXT", context?.name);
-      const n = "jane";
-      if (!users[n]) {
-        throw new AuthenticationError("Invalid credentials");
-      }
-
-      return users[n].todos;
-    },
+   
     profile: async (_parent, _args, context) => {
       console.log("profile", context?.name);
 
@@ -204,18 +199,19 @@ async function startServer() {
   });
   await server.start();
   server.applyMiddleware({ app });
-  const PORT = 3000;
 
   app.get("/success/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    updateFromStripe(id, "success");
+    updateFromStripe(id, 1);
     const resp = { status: "success", id: id, token: token }
     res.send(resp);
   });
   app.get("/failure/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
+    updateFromStripe(id, -1);
+
     const resp = { status: "failed", id: id, token: token }
     res.send(resp);
   });
