@@ -23,7 +23,7 @@ const charge = async (res, amount) => {
             line_items: lineItems,
             client_reference_id: items[0].charge_id,
             success_url: `${process.env.CLIENT_URL}/success/${id}/2023`,
-            cancel_url: `${process.env.CLIENT_URL}/cancel/${id}/2023`,
+            cancel_url: `${process.env.CLIENT_URL}/failure/${id}/2023`,
         })
         res.redirect(session.url);
     } catch (e) {
