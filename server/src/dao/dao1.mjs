@@ -26,8 +26,6 @@ const donationSchema = new Schema({
 }, { collection: 'donations' });
 const DonationData = mongoose.model('DonationData', donationSchema);
 
-
-
 function getConnURL() {
     return process.env.MONGO_URL || "mongodb://localhost:27017/FauziaA";
 }
@@ -47,9 +45,7 @@ const updateUser = async (userId, password1, password2, lastName, firstName, ema
             roleId: roleId,
             status: status
         }
-        console.log("Update User:", user)
         const resp = await UserData.create(user);
-        console.log(resp);
         return user;
     } catch (e) {
         console.log(e);
@@ -93,23 +89,18 @@ const addDonation = async (email, amount) => {
     return 1;
 }
 const getUsers = async (id) => {
-    console.log("from dao: " + id);
     const data = await UserData.find({});
     //const donations = data ? data.donations : [];
-    console.log("found", data);
     const users = [];
     for (let u of data) {
         console.log("U:", u);
         const user = { userId: u._id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1, donations: u.donations }
         users.push(user);
     }
-    console.log("USERS", users);
     return users;
 }
 const getUserById = async (id) => {
-    console.log("ID: ", id)
     const user = await UserData.findById(id);
-    console.log("DATA:", user);
     if (user) {
         return user;
     } else {
@@ -137,7 +128,6 @@ const dbAuth = async (username, password) => {
         return { status: -2, message: "Invalid password" }
     }
     const user = { name: data[0].email, status: 1, message: "Authenticated", userId: data[0]._id };
-    console.log("dbAuth", user);
     return user;
 
 }

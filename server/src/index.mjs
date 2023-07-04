@@ -2,6 +2,7 @@ import { ApolloServer, gql, AuthenticationError } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import guid from "guid";
 //require("dotenv").config();
+import Test from './services/test.js';
 import dotenv from 'dotenv'
 dotenv.config();
 console.log("process.env.MONGO_URL:", process.env.MONGO_URL);
@@ -10,7 +11,9 @@ console.log("process.env.MONGO_URL:", process.env.MONGO_URL);
 import { charge } from "./services/stripe.mjs";
 import express from 'express';
 import cors from 'cors';
-import { dbAuth, updateUser, getUserByEmail, getDonations, updateFromStripe } from "./dao/dao1.mjs";
+//import { dbAuth, updateUser, getUserByEmail, getDonations, updateFromStripe } from "./dao/dao1.mjs";
+import MainDAO from "./dao/DAOClass.js";
+const dao  = new MainDAO(process.env.MONGO_URL);
 const PORT = 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
@@ -37,7 +40,7 @@ const resolvers = {
     profile: async (_parent, _args, context) => {
       console.log("profile", context?.name);
 
-      const user = await getUserByEmail(context?.name);
+      const user = await dao.getUserByEmail(context?.name);
 
       console.log("USER", user);
       if (!user) {
@@ -49,7 +52,7 @@ const resolvers = {
     donations: async (_parent, _args, context) => {
       console.log("profile", context?.name);
 
-      const donations = await getDonations(context?.name);
+      const donations = await dao.getDonations(context?.name);
 
       console.log("donations", donations);
 
@@ -63,7 +66,7 @@ const resolvers = {
       { name, password }
     ) => {
       console.log("NAME:", name)
-      const user = await dbAuth(name, password);
+      const user = await dao.dbAuth(name, password);
 
       if (user && user.status === 1) {
         return jwt.sign({ data: name }, JWT_SECRET, { expiresIn: "7 days" });
@@ -77,7 +80,7 @@ const resolvers = {
     ) => {
       console.log("NAME:", email)
       // updateUser = async (userId: string, password1: string, password2: string, lastName: string, firstName: string, email: string, roleId: string, status: string)
-      const user = await updateUser("", password1, password2, lastName, firstName, email, 1, 1);
+      const user = await dao.updateUser("", password1, password2, lastName, firstName, email, 1, 1);
 
       if (user && user?.status === 1) {
         return jwt.sign({ data: email }, JWT_SECRET, { expiresIn: "7 days" });
@@ -191,7 +194,6 @@ async function startServer() {
       } catch (e) {
         console.log("JWT ERROR ", e);
       }
-      console.log("ctx.name:", ctx.name);
       return ctx;
     },
     typeDefs,
@@ -203,7 +205,7 @@ async function startServer() {
   app.get("/success/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    updateFromStripe(id, 1);
+    dao.updateFromStripe(id, 1);
     const msg = `<h1>Your payment has been received, confirmation # ${id}</h1>`
 
     const resp = { status: "success", id: id, token: token }
@@ -212,11 +214,14 @@ async function startServer() {
   app.get("/failure/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    updateFromStripe(id, -1);
+    dao.updateFromStripe(id, -1);
     const msg = `<h1>Your payment failed, reference # ${id}</h1>`
     const resp = { status: "failed", id: id, token: token }
     res.send(msg);
   });
+  const test = new Test("http://test.com");
+  const url = test.getURL();
+  console.log ("TEST URL:", url)
   app.listen(PORT, () => {
     console.log(`🚀  server ready at ${PORT}`);
   });
