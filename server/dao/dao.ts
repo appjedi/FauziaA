@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
-mongoose.connect('mongodb://localhost:27017/FauziaA');
+const url = getConnURL();
+console.log("MONGO URL", url);
+mongoose.connect(url ? url : "");
+
 var Schema = mongoose.Schema;
 
 var userDataSchema = new Schema({
@@ -9,7 +12,7 @@ var userDataSchema = new Schema({
     firstName: String,
     status: Number,
     roleid: Number,
-    donations: []
+    donations: Array
 }, { collection: 'users' });
 var UserData = mongoose.model('UserData', userDataSchema);
 const donationSchema = new Schema({
@@ -22,7 +25,12 @@ const donationSchema = new Schema({
     posted: String
 }, { collection: 'donations' });
 const DonationData = mongoose.model('DonationData', donationSchema);
-
+function getConnURL() {
+    return process.env.MONGO_URL || "";
+}
+const updateFromStripe = (id: string, status: String) => {
+    console.log("updateFromStripe.ID:", id);
+}
 const updateUser = async (userId: string, password1: string, password2: string, lastName: string, firstName: string, email: string, roleId: number, status: number) => {
     try {
         const user = {
@@ -53,6 +61,7 @@ const addDonation = async (email: string, amount: number) => {
         const user = await getUserByEmail(email);
         console.log("addDonation.user:", email, user);
         const userId = (user ? user.userId : "");
+
         const id = new Date().getTime();
         const donation = {
             id: id,
@@ -63,10 +72,13 @@ const addDonation = async (email: string, amount: number) => {
             posted: new Date(),
             paid: null
         }
+
         console.log("donation:", donation)
         // user.donations.push({ id: id, amount: amount, status: 0, paid: "" });
         const resp = await DonationData.create(donation);
         console.log("addDonation.RESP:", resp);
+        const donations = await getDonations(email);
+        await UserData.findOneAndUpdate({ email: email }, { donations: donations });
         return id;
     } catch (e) {
         console.log(e);
@@ -77,6 +89,7 @@ const addDonation = async (email: string, amount: number) => {
 const getUsers = async (id: string) => {
     console.log("from dao: " + id);
     const data = await UserData.find({});
+    //const donations = data ? data.donations : [];
     console.log("found", data);
     const users = [];
     for (let u of data) {
@@ -103,10 +116,10 @@ const getUserByEmail = async (email: string) => {
     if (data) {
         const u = data[0];
         const id = u._id.toString()
-        const user = { userId: id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1 }
+        const user = { userId: id, username: u.email, lastName: u.lastName, firstName: u.firstName, email: u.email, password: "******", roleId: 1, status: 1, donations: u.donations }
         return user;
     } else {
-        const user = { userId: "NF", username: email, lastName: "", firstName: "", email: "", password: "", roleId: 0, status: 0 }
+        const user = { userId: "NF", username: email, lastName: "", firstName: "", email: "", password: "", roleId: 0, status: 0, donations: [] }
     }
 }
 const dbAuth = async (username: string, password: string) => {
@@ -122,4 +135,4 @@ const dbAuth = async (username: string, password: string) => {
     return user;
 
 }
-export { updateUser, getUsers, dbAuth, addDonation, getUserByEmail, getDonations };
+export { updateUser, getUsers, dbAuth, addDonation, getUserByEmail, getDonations, updateFromStripe };
