@@ -204,16 +204,18 @@ async function startServer() {
     const id = req.params.id;
     const token = req.params.token;
     updateFromStripe(id, 1);
+    const msg = `<h1>Your payment has been received, confirmation # ${id}</h1>`
+
     const resp = { status: "success", id: id, token: token }
-    res.send(resp);
+    res.send(msg);
   });
   app.get("/failure/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
     updateFromStripe(id, -1);
-
+    const msg = `<h1>Your payment failed, reference # ${id}</h1>`
     const resp = { status: "failed", id: id, token: token }
-    res.send(resp);
+    res.send(msg);
   });
   app.listen(PORT, () => {
     console.log(`🚀  server ready at ${PORT}`);
