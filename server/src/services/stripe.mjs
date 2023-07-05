@@ -6,10 +6,11 @@ import MainDAO from "../dao/DAOClass.js";
 //const stripe (process.env.STRIPE_PRIVATE_KEY);
 const charge = async (dao, email, amount) => {
     try {
-        //const dao = new MainDAO(process.env.MongoDB);
-        const stripe =new Stripe(process.env.STRIPE_PRIVATE_KEY);
+        //const dao = new MainDAO();
+        const key = await dao.getKeyValue("PAYMENT_API_KEY");
+        const stripe =new Stripe(key);
 
-        console.log("STRIPE_PRIVATE_KEY", process.env.STRIPE_PRIVATE_KEY);
+        console.log("DB.STRIPE_PRIVATE_KEY", key);
         const description = "Donation"
         const test = [{
             "price_data": {
@@ -19,7 +20,6 @@ const charge = async (dao, email, amount) => {
             },
             "quantity": 1
         }];
-
 
         const dt = new Date();
         const id = dt.getTime();

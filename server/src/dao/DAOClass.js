@@ -9,7 +9,7 @@ class MainDAO {
     init = async (url) => {
         console.log("MONGO URL", url);
         mongoose.connect(url ? url : "");
-    
+
         //const url = getConnURL();
 
         const Schema = mongoose.Schema;
@@ -35,8 +35,21 @@ class MainDAO {
             posted: String
         }, { collection: 'donations' });
         this.DonationData = mongoose.model('DonationData', this.donationSchema);
-    }
 
+        this.keyValueSchema = new Schema({
+            key: String,
+            value: String
+        }, { collection: 'key_values' });
+            
+        this.KeyValueData = mongoose.model('KeyValueData', this.keyValueSchema);
+                const stripeKey = await this.getKeyValue("PAYMENT_API_KEY");
+        console.log("PAYMENT_API_KEY", stripeKey);
+    }
+    getKeyValue = async (key) => {
+        const doc = await this.KeyValueData.find({ key: key })
+        //console.log("getKeyValue", key, value);
+        return doc[0].value;
+    }
     getConnURL() {
         return process.env.MONGO_URL ||"mongodb+srv://appuser:AppData2022@cluster0.aga82.mongodb.net/FauziaA"
         //    "mongodb://localhost:27017/FauziaA";
