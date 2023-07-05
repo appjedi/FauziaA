@@ -4,8 +4,9 @@ import Stripe from 'stripe';
 import MainDAO from "../dao/DAOClass.js";
 
 //const stripe (process.env.STRIPE_PRIVATE_KEY);
-const charge = async (email, amount) => {
+const charge = async (dao, email, amount) => {
     try {
+        //const dao = new MainDAO(process.env.MongoDB);
         const stripe =new Stripe(process.env.STRIPE_PRIVATE_KEY);
 
         console.log("STRIPE_PRIVATE_KEY", process.env.STRIPE_PRIVATE_KEY);

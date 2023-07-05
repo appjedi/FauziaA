@@ -2,7 +2,6 @@ import { ApolloServer, gql, AuthenticationError } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import guid from "guid";
 //require("dotenv").config();
-import Test from './services/test.js';
 import dotenv from 'dotenv'
 dotenv.config();
 console.log("process.env.MONGO_URL:", process.env.MONGO_URL);
@@ -90,7 +89,7 @@ const resolvers = {
     },
     donate: async (_parent, { amount }) => {
       console.log("donate.amount", amount, userName);
-      const resp = await charge(userName, amount);
+      const resp = await charge(dao,userName, amount);
       console.log(resp);
       if (resp.status === 200) {
         console.log("redirect:", resp.url);
@@ -219,9 +218,7 @@ async function startServer() {
     const resp = { status: "failed", id: id, token: token }
     res.send(msg);
   });
-  const test = new Test("http://test.com");
-  const url = test.getURL();
-  console.log ("TEST URL:", url)
+
   app.listen(PORT, () => {
     console.log(`🚀  server ready at ${PORT}`);
   });

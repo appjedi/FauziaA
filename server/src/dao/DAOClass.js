@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-module.exports = class MainDAO {
+module.exports =
+class MainDAO {
     constructor(url) {
         this.url = this.getConnURL();
         this.init(this.url);
@@ -35,8 +36,10 @@ module.exports = class MainDAO {
         }, { collection: 'donations' });
         this.DonationData = mongoose.model('DonationData', this.donationSchema);
     }
+
     getConnURL() {
-        return process.env.MONGO_URL || "mongodb://localhost:27017/FauziaA";
+        return process.env.MONGO_URL ||"mongodb+srv://appuser:AppData2022@cluster0.aga82.mongodb.net/FauziaA"
+        //    "mongodb://localhost:27017/FauziaA";
     }
     updateFromStripe = async (id, status) => {
         const paid = new Date().getTime()
