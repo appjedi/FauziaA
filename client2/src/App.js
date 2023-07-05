@@ -2,19 +2,25 @@ import logo from './logo.svg';
 import './App.css';
 import Login from './components/login';
 import Dashboard from './components/dashboard';
-import Reg from './components/register';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-
   Routes,
-  Route,
-  Link
+  Route
 } from 'react-router-dom';
 import Register from './components/register';
 function App() {
   const [token, setToken] = useState("");
-
+  useEffect(() => {
+        init();
+  }, []);
+  const init = () => {
+    const token = sessionStorage.getItem("SERVER_API_TOKEN");
+    if (token)
+    {
+      setToken(token);
+    }
+  }
   return (
     <div className="App">
 
