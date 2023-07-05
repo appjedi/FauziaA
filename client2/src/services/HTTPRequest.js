@@ -18,9 +18,8 @@ export default class HTTPRequest{
                     authenticate(name:"${username}", password:"${password}")
                 }`;
         const headers= {
-                    'Content-Type': 'application/json'
-                    
-                }
+            'Content-Type': 'application/json'
+        }
         const response = await fetch(url, {
                 method: 'POST',
                 headers: headers,
@@ -37,19 +36,17 @@ export default class HTTPRequest{
         return token;
     }
 
-    static async  server(query)
+    static async server(query)
     {
         token = sessionStorage.getItem("SERVER_API_TOKEN");
         const headers = token ?
-        
-             {
-                'Content-Type': 'application/json',
-                'x-access-token': `${token}`
-            }
+        {
+            'Content-Type': 'application/json',
+            'x-access-token': `${token}`
+        }
         :
         {
-                'Content-Type': 'application/json'
-                
+            'Content-Type': 'application/json'    
         }
     
         console.log("HEADERS:", headers);
