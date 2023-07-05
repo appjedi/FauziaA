@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { auth } from './server';
+import { auth } from '../services/server';
 import {
     Link
 } from 'react-router-dom';

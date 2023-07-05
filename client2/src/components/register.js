@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { server } from './server';
+import { server } from '../services/server';
 
 const Register = ({ setToken }) => {
     const [username, setUsername] = useState("");

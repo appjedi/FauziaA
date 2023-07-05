@@ -1,11 +1,14 @@
 const url = 'http://localhost:4000/graphql';
-let token;
+let token=sessionStorage.getItem("SERVER_API_TOKEN");;
 export function setToken(t) {
     token = t;
     console.log("setToken", t);
     sessionStorage.setItem("SERVER_API_TOKEN", t);
 }
-export function getToken() { return token; }
+export function getToken() {
+    token = sessionStorage.getItem("SERVER_API_TOKEN");
+    return token;
+}
 export function getServerURL() { return url; }
 export async function auth(username, password)
 {
@@ -97,4 +100,9 @@ export async function getDonations(){
     const donations = JSON.parse(responseData.data.donations)
     console.log("responseData", donations)
     return donations;
+}
+
+export function nicedate(id) {
+    const dt = new Date(parseInt(id));
+    return dt.toUTCString()
 }
