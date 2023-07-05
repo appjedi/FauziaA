@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getProfile, donate, getDonations, nicedate } from '../services/server';
-
+//import { getProfile, donate, getDonations, nicedate } from '../services/server';
+import HTTPRequest from "../services/HTTPRequest";
+import Helper from '../services/helper';
+import {
+  Link
+} from 'react-router-dom';
 const Dashboard = ({ token }) => {
     const [amount, setAmount] = useState(0);
     const [profile, setProfile] = useState({ lastName: "", firstName: "" });
@@ -9,10 +13,10 @@ const Dashboard = ({ token }) => {
         init();
     }, []);
     const init = async () => {
-        const profile = await getProfile();
+        const profile = await HTTPRequest.getProfile();
         setProfile(profile);
 
-        const donations = await getDonations();
+        const donations = await HTTPRequest.getDonations();
         setDonations(donations);
     }
 
@@ -22,20 +26,23 @@ const Dashboard = ({ token }) => {
     };
 
     const donateHandler= async () => {
-        //const amount = prompt("Amount: ");
-        const url = await donate(amount);
+        const url = await HTTPRequest.donate(amount);
         window.open(url);
-        // const s = JSON.parse(responseData.data.donate);
     }
 
     const donationsList = donations.map((row) =>
         <tr key={row.id}>
-            <td>${row.amount}</td><td>{nicedate(row.id)}</td>
+            <td>${row.amount}</td><td>{Helper.nicedate(row.id)}</td>
         </tr>
     );
     
     return (
         <div>
+            <div>
+          <ul>
+            <li><Link to="/signout">Signout</Link></li>
+          </ul>
+        </div>
             <h1>Welcome {profile.firstName}</h1>
             <p><input type="text" name="amount" id="amount" value={amount} onChange={amountHandler} placeholder="donation amount" /></p>
             <p><button onClick={donateHandler}>Donate</button></p>

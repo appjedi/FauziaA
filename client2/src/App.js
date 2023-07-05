@@ -6,8 +6,7 @@ import Dashboard from './components/dashboard';
 import React, { useState, useEffect } from "react";
 import {
   Routes,
-  Route,
-  Link
+  Route
 } from 'react-router-dom';
 import Register from './components/register';
 function App() {
@@ -28,11 +27,7 @@ function App() {
       <header className="App-header">
         <h1>Welcome to my donation site</h1>
         <img src={logo} className="App-logo" alt="logo" />
-        <div>
-          <ul>
-            <li><Link to="/signout">Signout</Link></li>
-          </ul>
-        </div>
+        
         <Routes>
           <Route path="/" element={
             token ?

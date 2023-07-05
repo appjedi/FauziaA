@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { server } from '../services/server';
-
+//import { server } from '../services/server';
+import HTTPRequest from "../services/HTTPRequest";
 const Register = ({ setToken }) => {
     const [username, setUsername] = useState("");
     const [password1, setPassword1] = useState("");
@@ -43,7 +43,7 @@ const Register = ({ setToken }) => {
             }`;
 
         console.log("Q:", query)
-        const response = await server(query);
+        const response = await HTTPRequest.server(query);
 
 
         const responseText = await response.text();

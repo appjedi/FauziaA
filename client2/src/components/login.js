@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {useNavigate} from  "react-router-dom";
-import { auth } from '../services/server';
+import HTTPRequest from "../services/HTTPRequest";
 import {
     Link
 } from 'react-router-dom';
@@ -31,7 +31,7 @@ const Login = ({ setToken }) => {
         const un = username;
         const pw = password;
        
-        const token = await auth(un,pw);
+        const token = await HTTPRequest.auth(un,pw);
         if (token) {
             console.log("responseData.token", token)
             setToken(token);
