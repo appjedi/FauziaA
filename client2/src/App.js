@@ -6,7 +6,8 @@ import Dashboard from './components/dashboard';
 import React, { useState, useEffect } from "react";
 import {
   Routes,
-  Route
+  Route,
+  Link
 } from 'react-router-dom';
 import Register from './components/register';
 function App() {
@@ -21,12 +22,17 @@ function App() {
       setToken(token);
     }
   }
+
   return (
     <div className="App">
-
       <header className="App-header">
         <h1>Welcome to my donation site</h1>
         <img src={logo} className="App-logo" alt="logo" />
+        <div>
+          <ul>
+            <li><Link to="/signout">Signout</Link></li>
+          </ul>
+        </div>
         <Routes>
           <Route path="/" element={
             token ?
@@ -37,9 +43,8 @@ function App() {
             token ?
               <Dashboard token={token} />
               : <Login setToken={setToken} />} />
-
-
-
+          <Route path="/signout" element={<Login setToken={setToken} />}/>
+      
         </Routes>
       </header>
     </div>

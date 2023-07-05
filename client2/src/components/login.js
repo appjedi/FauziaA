@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {useNavigate} from  "react-router-dom";
 import { auth } from '../services/server';
 import {
     Link
@@ -6,7 +7,15 @@ import {
 const Login = ({ setToken }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+  useEffect(() => {
+        init();
+  }, []);
+    const navigate = useNavigate();
 
+  const init = () => {
+    const token = sessionStorage.removeItem("SERVER_API_TOKEN");
+      console.log("signed out");
+  }
     const usernameHandler = (e) => {
         setUsername(e.target.value);
         console.log("setUsername", e.target.value);
@@ -23,9 +32,12 @@ const Login = ({ setToken }) => {
         const pw = password;
        
         const token = await auth(un,pw);
-        
-        console.log("responseData.token", token)
-        setToken(token)
+        if (token) {
+            console.log("responseData.token", token)
+            setToken(token);
+            navigate("/");
+        }
+
     }
     return (
         <div>
