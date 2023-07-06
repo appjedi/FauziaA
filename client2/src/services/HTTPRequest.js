@@ -28,14 +28,36 @@ export default class HTTPRequest{
                 }),
         });
         const responseText = await response.text();
-        console.log("responseText", responseText);
+        //console.log("responseText", responseText);
         const responseData = JSON.parse(responseText);
         const token = responseData.data.authenticate;
-        console.log("responseData.token", token)
+        //console.log("responseData.token", token)
         setToken(token)
         return token;
     }
-
+    static async graphql(query)
+    {
+        token = sessionStorage.getItem("SERVER_API_TOKEN");
+        const headers = token ?
+        {
+            'Content-Type': 'application/json',
+            'x-access-token': `${token}`
+        }
+        :
+        {
+            'Content-Type': 'application/json'    
+        }
+    
+        //console.log("HEADERS:", headers);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                query: query,
+            }),
+         });
+        return response;
+    }
     static async server(query)
     {
         token = sessionStorage.getItem("SERVER_API_TOKEN");
@@ -64,11 +86,11 @@ export default class HTTPRequest{
         const q = `mutation{
                     donate(amount: ${amount})
                 }`
-        console.log("Q:", q)
+        //console.log("Q:", q)
         const response = await HTTPRequest.server(q);
 
         const responseText = await response.text();
-        console.log("responseText", responseText);
+        //console.log("responseText", responseText);
         const url = responseText.split("url:")[1].split('"}}')[0];
         const responseData = JSON.parse(responseText);
         return url;
@@ -78,26 +100,27 @@ export default class HTTPRequest{
     {
         const q = "query {profile }";
 
-        console.log("Q:", q)
+        //console.log("Q:", q)
         const response = await HTTPRequest.server(q);
 
         const responseText = await response.text();
-        console.log("responseText", responseText);
+        //console.log("responseText", responseText);
         const responseData = JSON.parse(responseText);
         //donations = JSON.parse(responseData.data)
         const profile = JSON.parse(responseData.data.profile);
-        console.log("responseData", profile)
+        //console.log("responseData", profile)
         return profile;
     }
-    static async getDonations(){
+    static async getDonations()
+    {
         const q = "query {donations }";
-        console.log("getTodos.TOKEN:", q);
+        //console.log("getTodos.TOKEN:", q);
         const response = await HTTPRequest.server(q, token);
         const responseText = await response.text();
-        console.log("responseText", responseText);
+        //console.log("responseText", responseText);
         const responseData = JSON.parse(responseText);
         const donations = JSON.parse(responseData.data.donations)
-        console.log("responseData", donations)
+        //console.log("responseData", donations)
         return donations;
     }
 }

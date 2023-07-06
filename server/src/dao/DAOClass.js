@@ -41,9 +41,6 @@ class MainDAO {
             value: String
         }, { collection: 'key_values' });
         this.KeyValueData = mongoose.model('KeyValueData', this.keyValueSchema);
-        
-        //const stripeKey = await this.getKeyValue("PAYMENT_API_KEY");
-        //console.log("PAYMENT_API_KEY", stripeKey);
     }
     getKeyValue = async (key) => {
         const doc = await this.KeyValueData.find({ key: key })
