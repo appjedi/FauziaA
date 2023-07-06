@@ -1,17 +1,41 @@
 const url = 'http://localhost:4000/graphql';
-let token=sessionStorage.getItem("SERVER_API_TOKEN");;
+const SERVER_API_TOKEN = "SERVER_API_TOKEN";
+let token=sessionStorage.getItem(SERVER_API_TOKEN);;
 function setToken(t) {
     token = t;
     console.log("setToken", t);
-    sessionStorage.setItem("SERVER_API_TOKEN", t);
+    sessionStorage.setItem(SERVER_API_TOKEN, t);
 }
 function getToken() {
-    token = sessionStorage.getItem("SERVER_API_TOKEN");
+    token = sessionStorage.getItem(SERVER_API_TOKEN);
     return token;
 }
 function getServerURL() { return url; }
 
 export default class HTTPRequest{
+    static setToken(t) {
+        if ((t + "").length < 100)
+        {
+            console.log("Invalid token");
+            return false;
+        }
+        token = t;
+        console.log("HTTPRequest.setToken", t);
+        sessionStorage.setItem(SERVER_API_TOKEN, t);
+        return true;
+    }
+    static async logout() {
+        console.log("LOGOUT:", SERVER_API_TOKEN);
+        const q = "query {logout }";
+        //console.log("getTodos.TOKEN:", q);
+        const response = await HTTPRequest.server(q);
+        const responseText = await response.text();
+        console.log("responseText", responseText);
+
+        sessionStorage.removeItem(SERVER_API_TOKEN);
+       
+        return responseText;
+    }
     static async auth(username, password)
     {
         const query = `mutation{
@@ -37,7 +61,7 @@ export default class HTTPRequest{
     }
     static async graphql(query)
     {
-        token = sessionStorage.getItem("SERVER_API_TOKEN");
+        token = sessionStorage.getItem(SERVER_API_TOKEN);
         const headers = token ?
         {
             'Content-Type': 'application/json',
@@ -60,7 +84,7 @@ export default class HTTPRequest{
     }
     static async server(query)
     {
-        token = sessionStorage.getItem("SERVER_API_TOKEN");
+        token = sessionStorage.getItem(SERVER_API_TOKEN);
         const headers = token ?
         {
             'Content-Type': 'application/json',

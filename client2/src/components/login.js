@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {useNavigate} from  "react-router-dom";
 import HTTPRequest from "../services/HTTPRequest";
 import {
     Link
@@ -10,19 +9,16 @@ const Login = ({ setToken }) => {
   useEffect(() => {
         init();
   }, []);
-    const navigate = useNavigate();
 
   const init = () => {
-    const token = sessionStorage.removeItem("SERVER_API_TOKEN");
-      console.log("signed out");
+    //const token = sessionStorage.removeItem("SERVER_API_TOKEN");
+      console.log("login");
   }
     const usernameHandler = (e) => {
         setUsername(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const passwordHandler = (e) => {
         setPassword(e.target.value);
-        console.log("setPassword", e.target.value);
     };
     const donate = async () => {
         console.log("donate");
@@ -34,8 +30,8 @@ const Login = ({ setToken }) => {
         const token = await HTTPRequest.auth(un,pw);
         if (token) {
             console.log("responseData.token", token)
-            setToken(token);
-            navigate("/");
+            setToken(token, "/");
+
         }
 
     }

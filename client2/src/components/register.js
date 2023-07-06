@@ -10,23 +10,18 @@ const Register = ({ setToken }) => {
 
     const usernameHandler = (e) => {
         setUsername(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const lastNameHandler = (e) => {
         setLastName(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const firstNameHandler = (e) => {
         setFirstName(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const password1Handler = (e) => {
         setPassword1(e.target.value);
-        console.log("setPassword", e.target.value);
     };
     const password2Handler = (e) => {
         setPassword2(e.target.value);
-        console.log("setPassword", e.target.value);
     };
     const donate = async () => {
         console.log("donate");
@@ -51,7 +46,8 @@ const Register = ({ setToken }) => {
         const responseData = JSON.parse(responseText);
         const token = responseData.data.reg;
         console.log("responseData.token", token)
-        setToken(token);
+        HTTPRequest.setToken(token)
+        setToken(token, "/");
     }
     return (
         <div>

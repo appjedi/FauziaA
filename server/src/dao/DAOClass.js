@@ -10,8 +10,6 @@ class MainDAO {
         console.log("MONGO URL", url);
         mongoose.connect(url ? url : "");
 
-        //const url = getConnURL();
-
         const Schema = mongoose.Schema;
 
         this.userDataSchema = new Schema({

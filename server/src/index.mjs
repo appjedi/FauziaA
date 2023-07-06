@@ -22,6 +22,7 @@ const typeDefs = gql`
   type Query {
     profile: String!
     donations: String!
+    logout: String!
   }
 
   type Mutation {
@@ -58,6 +59,11 @@ const resolvers = {
 
       return JSON.stringify(donations);
     },
+    logout: (_parent, _args, context) => {
+      console.log("logout");
+      jwt.sign({ data: context?.name }, JWT_SECRET, { expiresIn: "1 s" });
+      return "logged out";
+    }
   },
   Mutation: {
     authenticate: async (
