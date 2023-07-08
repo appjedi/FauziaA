@@ -1,103 +1,62 @@
 import React, { useState, useEffect } from "react";
-
-const Dashboard = ({ token }) => {
+//import { getProfile, donate, getDonations, nicedate } from '../services/server';
+import HTTPRequest from "../services/HTTPRequest";
+import Helper from '../services/helper';
+import {
+  Link
+} from 'react-router-dom';
+const Dashboard = ({ token, setToken }) => {
     const [amount, setAmount] = useState(0);
     const [profile, setProfile] = useState({ lastName: "", firstName: "" });
     const [donations, setDonations] = useState([]);
     useEffect(() => {
-        getProfile();
-        getDonations();
+        init();
     }, []);
+    const init = async () => {
+        const profile = await HTTPRequest.getProfile();
+        setProfile(profile);
+
+        const donations = await HTTPRequest.getDonations();
+        setDonations(donations);
+    }
     const amountHandler = (e) => {
         setAmount(e.target.value);
         console.log("setAmount", e.target.value);
     };
-
-    const getProfile = async () => {
-        console.log("TOKEN", token);
-        const q = "query {profile }";
-        const response = await fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': `${token}`
-            },
-            body: JSON.stringify({
-                query: q,
-            }),
-        });
-        const responseText = await response.text();
-        console.log("responseText", responseText);
-        const responseData = JSON.parse(responseText);
-        //donations = JSON.parse(responseData.data)
-        const profile = JSON.parse(responseData.data.profile);
-        console.log("responseData", profile)
-        setProfile(profile);
-    }
-    const getDonations = async () => {
-        const q = "query {donations }";
-        console.log("getTodos.TOKEN:", q);
-        const response = await fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': `${token}`
-            },
-            body: JSON.stringify({
-                query: q,
-            }),
-        });
-        const responseText = await response.text();
-        console.log("responseText", responseText);
-        const responseData = JSON.parse(responseText);
-        const donations = JSON.parse(responseData.data.donations)
-        console.log("responseData", donations)
-        setDonations(donations);
-    }
-    const donate = async () => {
-
-        //const amount = prompt("Amount: ");
-        const q = `mutation{
-                donate(amount: ${amount})
-            }`
-        console.log("Q:", q)
-        const response = await fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': `${token}`
-            },
-            body: JSON.stringify({
-                query: q,
-            }),
-        });
-        const responseText = await response.text();
-        console.log("responseText", responseText);
-        const url = responseText.split("url:")[1].split('"}}')[0];
-        const responseData = JSON.parse(responseText);
+    const donateHandler= async () => {
+        const url = await HTTPRequest.donate(amount);
         window.open(url);
-        // const s = JSON.parse(responseData.data.donate);
-        console.log("responseData", url, responseData.data.donate)
+        const d = await HTTPRequest.getDonations();
+        setDonations(d);
     }
+    const logout =async () => {
+        console.log("DB.LOGOUT");
 
-    const listDonations = donations.map((row) =>
-        <li key={row.id}>
-            ${row.amount} on {nicedate(row.id)}
-        </li>
-    );
-    function nicedate(id) {
-        const dt = new Date(parseInt(id));
-        return dt.toUTCString()
+        const resp = await HTTPRequest.logout();
+        console.log ("RESP:", resp)
+        setToken("");
     }
+    const donationsList = donations.map((row) =>
+        <tr key={row.id}>
+            <td>${row.amount}</td><td>{Helper.nicedate(row.id)}</td>
+        </tr>
+    );
+    
     return (
         <div>
+            <div>
+         
+                    <p><button onClick={logout}>Logout</button></p>
+          
+        </div>
             <h1>Welcome {profile.firstName}</h1>
-            <p><input type="text" name="amount" id="amount" value={amount} onChange={amountHandler} placeholder="donation amount" /></p>
-            <p><button onClick={donate}>Donate</button></p>
+            <p><input type="text" name="amount" id="amount" value={amount} onChange={amountHandler} placeholder="donation amount" />
+            <button onClick={donateHandler}>Donate</button></p>
             <p>
-                {donations ? listDonations : ""
+                {donations ? <table border='1'><thead><tr><th>Amount</th><th>Date</th></tr></thead><tbody>{donationsList}</tbody></table> : ""
                 }
             </p>
-        </div>)
+        </div>
+    )
 }
 export default Dashboard;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-
+//import { server } from '../services/server';
+import HTTPRequest from "../services/HTTPRequest";
 const Register = ({ setToken }) => {
     const [username, setUsername] = useState("");
     const [password1, setPassword1] = useState("");
@@ -9,23 +10,18 @@ const Register = ({ setToken }) => {
 
     const usernameHandler = (e) => {
         setUsername(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const lastNameHandler = (e) => {
         setLastName(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const firstNameHandler = (e) => {
         setFirstName(e.target.value);
-        console.log("setUsername", e.target.value);
     };
     const password1Handler = (e) => {
         setPassword1(e.target.value);
-        console.log("setPassword", e.target.value);
     };
     const password2Handler = (e) => {
         setPassword2(e.target.value);
-        console.log("setPassword", e.target.value);
     };
     const donate = async () => {
         console.log("donate");
@@ -42,20 +38,16 @@ const Register = ({ setToken }) => {
             }`;
 
         console.log("Q:", query)
+        const response = await HTTPRequest.server(query);
 
-        const response = await fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                query: query,
-            }),
-        });
+
         const responseText = await response.text();
         console.log("responseText", responseText);
         const responseData = JSON.parse(responseText);
         const token = responseData.data.reg;
         console.log("responseData.token", token)
-        setToken(token);
+        HTTPRequest.setToken(token)
+        setToken(token, "/");
     }
     return (
         <div>

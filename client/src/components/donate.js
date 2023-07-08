@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { server } from '../services/server';
 
 const Donate = (token) => {
     const [amount, setAmount] = useState(0);
@@ -15,16 +16,8 @@ const Donate = (token) => {
                 donate(amount: ${amount})
             }`
         console.log("Q:", q)
-        const response = await fetch('http://localhost:3000/graphql', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': `${token}`
-            },
-            body: JSON.stringify({
-                query: q,
-            }),
-        });
+        const response = await server(q, token);
+        
         const responseText = await response.text();
         console.log("responseText", responseText);
         const url = responseText.split("url:")[1].split('"}}')[0];

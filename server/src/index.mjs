@@ -12,8 +12,8 @@ import express from 'express';
 import cors from 'cors';
 //import { dbAuth, updateUser, getUserByEmail, getDonations, updateFromStripe } from "./dao/dao1.mjs";
 import MainDAO from "./dao/DAOClass.js";
-const dao  = new MainDAO(process.env.MONGO_URL);
-const PORT = 4000;
+const dao = new MainDAO(process.env.MONGO_URL);
+const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 const refreshTokens = {};
@@ -36,7 +36,7 @@ let userName
 
 const resolvers = {
   Query: {
-   
+
     profile: async (_parent, _args, context) => {
       console.log("profile", context?.name);
 
@@ -95,7 +95,7 @@ const resolvers = {
     },
     donate: async (_parent, { amount }) => {
       console.log("donate.amount", amount, userName);
-      const resp = await charge(dao,userName, amount);
+      const resp = await charge(dao, userName, amount);
       console.log(resp);
       if (resp.status === 200) {
         console.log("redirect:", resp.url);
@@ -210,7 +210,7 @@ async function startServer() {
   app.get("/success/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    dao.updateFromStripe(id, 1);
+    // dao.updateFromStripe(id, 1);
     const msg = `<h1>Your payment has been received, confirmation # ${id}</h1>`
 
     const resp = { status: "success", id: id, token: token }
@@ -224,7 +224,12 @@ async function startServer() {
     const resp = { status: "failed", id: id, token: token }
     res.send(msg);
   });
-
+  if (process.env.NODE_ENV === "production") {
+    app.use(express.static("client/build"));
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    });
+  }
   app.listen(PORT, () => {
     console.log(`🚀  server ready at ${PORT}`);
   });
