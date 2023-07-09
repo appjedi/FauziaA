@@ -210,7 +210,7 @@ async function startServer() {
   app.get("/success/:id/:token", (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
-    // dao.updateFromStripe(id, 1);
+    dao.updateFromStripe(id, 1);
     const msg = `<h1>Your payment has been received, confirmation # ${id}</h1>`
 
     const resp = { status: "success", id: id, token: token }

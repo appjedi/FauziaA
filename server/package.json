@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.mjs",
-    "dev": "tsnd --respawn src/index.ts",
+    "dev": "tsnd --respawn src/index.mjs",
     "build": "tsc",
-    "serve": "node dist/index.js"
+    "serve": "node dist/index.mjs"
   },
   "dependencies": {
     "apollo-server": "^3.4.0",
