@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 //import { getProfile, donate, getDonations, nicedate } from '../services/server';
 import HTTPRequest from "../services/HTTPRequest";
-import Helper from '../services/helper';
+import Donations from './donations';
 import {
-  Link
+    Link
 } from 'react-router-dom';
 const Dashboard = ({ token, setToken }) => {
     const [amount, setAmount] = useState(0);
@@ -23,39 +23,29 @@ const Dashboard = ({ token, setToken }) => {
         setAmount(e.target.value);
         console.log("setAmount", e.target.value);
     };
-    const donateHandler= async () => {
+    const donateHandler = async () => {
         const url = await HTTPRequest.donate(amount);
         window.open(url);
         const d = await HTTPRequest.getDonations();
         setDonations(d);
     }
-    const logout =async () => {
+    const logout = async () => {
         console.log("DB.LOGOUT");
 
         const resp = await HTTPRequest.logout();
-        console.log ("RESP:", resp)
+        console.log("RESP:", resp)
         setToken("");
     }
-    const donationsList = donations.map((row) =>
-        <tr key={row.id}>
-            <td>${row.amount}</td><td>{Helper.nicedate(row.id)}</td>
-        </tr>
-    );
-    
+
     return (
         <div>
             <div>
-         
-                    <p><button onClick={logout}>Logout</button></p>
-          
-        </div>
+                <p><button onClick={logout}>Logout</button></p>
+            </div>
             <h1>Welcome {profile.firstName}</h1>
             <p><input type="text" name="amount" id="amount" value={amount} onChange={amountHandler} placeholder="donation amount" />
-            <button onClick={donateHandler}>Donate</button></p>
-            <p>
-                {donations ? <table border='1'><thead><tr><th>Amount</th><th>Date</th></tr></thead><tbody>{donationsList}</tbody></table> : ""
-                }
-            </p>
+                <button onClick={donateHandler}>Donate</button></p>
+            <Donations donations={donations} />
         </div>
     )
 }
